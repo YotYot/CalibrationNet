@@ -27,9 +27,6 @@ from unet.predict_cont import predict_full_img, get_Unet
 from MiDaS import MonoDepthNet
 
 
-
-
-
 def get_dirs(scene_name):
     if scene_name == 'Demo':
         right_train_dir = '/home/yotamg/ForDemo/Right'

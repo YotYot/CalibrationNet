@@ -193,25 +193,9 @@ class CalibrateThread(Thread):
 
 
     def cal_flow(self):
-        global c1,c2, t1, t2
         self.win.left.update = False
         self.win.right.update = False
-        # c1.freeze_video()
-        # c2.freeze_video()
-        try:
-            c1.exit()
-            c2.exit()
-        except:
-            pass
         self.calibrate()
-        if self.win.livefeed:
-            t1.pause = True
-            t2.pause = True
-            time.sleep(1)
-            t2, c2 = init_cam(right_cam_idx, win.right)
-            t1, c1 = init_cam(left_cam_idx, win.left)
-            c1.capture_video()
-            c2.capture_video()
         calibTrain = CalibTrain(mono_net=self.win.mononet_str, lr = self.win.lr)
         self.calibTrain = calibTrain
         self.calibTrain.scheduled_lr = self.win.scheduled_lr
@@ -302,14 +286,14 @@ class CalibDisp(QtWidgets.QWidget):
         self.MonoNet.stateChanged.connect(self.mononet_changed)
         self.gridLayout.addWidget(self.MonoNet, 4, 1, 1, 1)
 
-        self.LiveFeed = QtWidgets.QCheckBox(self.StaticPart)
-        self.LiveFeed.setChecked(False)
-        # self.LiveFeed.setChecked(True)
-        self.LiveFeed.setObjectName("LiveFeed")
-        self.livefeed = self.LiveFeed.isChecked()
-        self.LiveFeed.stateChanged.connect(self.livefeed_changed)
-        self.livefeed_changed(0)
-        self.gridLayout.addWidget(self.LiveFeed, 4, 0, 1, 1)
+        # self.LiveFeed = QtWidgets.QCheckBox(self.StaticPart)
+        # self.LiveFeed.setChecked(False)
+        # # self.LiveFeed.setChecked(True)
+        # self.LiveFeed.setObjectName("LiveFeed")
+        # self.livefeed = self.LiveFeed.isChecked()
+        # self.LiveFeed.stateChanged.connect(self.livefeed_changed)
+        self.set_images()
+        # self.gridLayout.addWidget(self.LiveFeed, 4, 0, 1, 1)
 
         self.EpochNumLabel = QtWidgets.QLabel(self.StaticPart)
         self.EpochNumLabel.setObjectName("label")
@@ -417,36 +401,16 @@ class CalibDisp(QtWidgets.QWidget):
         torch.cuda.empty_cache()
         self.calibTrain = calibTrain
 
-    def livefeed_changed(self, int):
-        global c1,c2, t1, t2
-        self.livefeed = self.LiveFeed.isChecked()
-        if not self.livefeed:
-            # c1.freeze_video()
-            # c2.freeze_video()
-            try:
-                c1.exit()
-                c2.exit()
-            except:
-                pass
-            time.sleep(2)
-            self.left.update = False
-            self.right.update = False
-            l_sample_image = plt.imread(os.path.join('Sample_Images', 'L_10.tif'))
-            r_sample_image = plt.imread(os.path.join('Sample_Images', 'R_10.tif'))
-            self.left.show_sample_image(l_sample_image)
-            self.right.show_sample_image(r_sample_image)
-            self.left.image_arr = l_sample_image
-            self.right.image_arr = r_sample_image
-        else:
-            self.left.update = True
-            self.right.update = True
-            t1.pause = True
-            t2.pause = True
-            time.sleep(1)
-            t2, c2 = init_cam(right_cam_idx, win.right)
-            t1, c1 = init_cam(left_cam_idx, win.left)
-            c1.capture_video()
-            c2.capture_video()
+    def set_images(self):
+        time.sleep(2)
+        self.left.update = False
+        self.right.update = False
+        l_sample_image = plt.imread(os.path.join('Sample_Images', 'L_10.tif'))
+        r_sample_image = plt.imread(os.path.join('Sample_Images', 'R_10.tif'))
+        self.left.show_sample_image(l_sample_image)
+        self.right.show_sample_image(r_sample_image)
+        self.left.image_arr = l_sample_image
+        self.right.image_arr = r_sample_image
 
 
     def start_calib(self):
@@ -461,7 +425,7 @@ class CalibDisp(QtWidgets.QWidget):
         Form.setWindowTitle(_translate("Form", "Form"))
         self.LeftLabel.setText(_translate("Form", "Left"))
         self.MonoLabel.setText(_translate("Form", "Mono Depth"))
-        self.LiveFeed.setText(_translate("Form", "Use live feed images"))
+        # self.LiveFeed.setText(_translate("Form", "Use live feed images"))
         self.CalibrateButton.setText(_translate("Form", "Calibrate!"))
         self.RightLabel.setText(_translate("Form", "Right (transformed)"))
         self.StereoLabel.setText(_translate("Form", "Stereo (B. Calib.)"))
@@ -503,12 +467,12 @@ if __name__ == '__main__':
     Form.show()
 
     # t1, c1 = init_cam(0, [win.left, win.mono])
-    t2, c2 = init_cam(right_cam_idx, win.right)
-    t1, c1 = init_cam(left_cam_idx, win.left)
+    # t2, c2 = init_cam(right_cam_idx, win.right)
+    # t1, c1 = init_cam(left_cam_idx, win.left)
 
     # cleanup
-    app.exit_connect(t1.stop)
-    app.exit_connect(t2.stop)
+    # app.exit_connect(t1.stop)
+    # app.exit_connect(t2.stop)
     sys.exit(app.exec_())
     # app.exec_()
     # app.exec_()
@@ -516,17 +480,17 @@ if __name__ == '__main__':
     win.predictionThread.join()
     win.calibrateThread.join()
 
-    t1.stop()
-    t1.join()
+    # t1.stop()
+    # t1.join()
+    #
+    # t2.stop()
+    # t2.join()
 
-    t2.stop()
-    t2.join()
+    # c1.stop_video()
+    # c1.exit()
 
-    c1.stop_video()
-    c1.exit()
-
-    c2.stop_video()
-    c2.exit()
+    # c2.stop_video()
+    # c2.exit()
 
 
 
